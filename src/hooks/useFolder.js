@@ -33,7 +33,7 @@ function reducer(state, { type, payload }) {
       return {
         //update the folder portion of our state
         ...state,
-        childFolders: payload.folder,
+        childFolders: payload.childFolders,
       };
     case ACTIONS.SET_CHILD_FILES:
       return {
@@ -86,6 +86,19 @@ export function useFolder(folderId = null, folder = null) {
         });
       });
   }, [folderId]);
+
+  useEffect(() => {
+    return database.folders
+      .where('parentId', '==', folderId)
+      .where('userId', '==', currentUser.uid)
+      .orderBy('createdAt')
+      .onSnapshot((snapshot) => {
+        dispatch({
+          type: ACTIONS.SET_CHILD_FOLDERS,
+          payload: { childFolders: snapshot.docs.map(database.formatDoc) },
+        });
+      });
+  }, [folderId, currentUser]);
 
   useEffect(
     () => {
